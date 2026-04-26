@@ -1,4 +1,4 @@
-name: Build rekameo
+name: Build kameo
 
 on:
   workflow_call:
@@ -14,7 +14,7 @@ on:
         default: ""
 
 env:
-  REXSDK_TAG: v0.7.6
+  REXSDK_TAG: nightly-20260425-711d4d33
   ASSETS_REPO: ${{ vars.ASSETS_REPO }}
   ASSET_PATH: default.xex
   ASSET_CACHE_KEY: codegen-assets-v1
@@ -32,20 +32,20 @@ jobs:
             preset: win-amd64-relwithdebinfo
             sdk_platform: win-amd64
             sdk_dir: win-amd64
-            binary: out/build/win-amd64-relwithdebinfo/rekameo.exe
-            artifact: rekameo-windows-x64.exe
+            binary: out/build/win-amd64-relwithdebinfo/kameo.exe
+            artifact: kameo-windows-x64.exe
 
           - platform: linux
             runner: ubuntu-latest
             preset: linux-amd64-relwithdebinfo
             sdk_platform: linux-amd64
             sdk_dir: linux-amd64
-            binary: out/build/linux-amd64-relwithdebinfo/rekameo
-            artifact: rekameo-linux-x64
+            binary: out/build/linux-amd64-relwithdebinfo/kameo
+            artifact: kameo-linux-x64
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Install dependencies (Linux)
         if: matrix.platform == 'linux'
@@ -66,16 +66,15 @@ jobs:
       - name: Download ReXGlue SDK (${{ env.REXSDK_TAG }})
         shell: bash
         run: |
-          ver="${{ env.REXSDK_TAG }}"
-          ver="${ver#v}"
-          url="https://github.com/rexglue/rexglue-sdk/releases/download/${{ env.REXSDK_TAG }}/rexglue-sdk-${ver}-${{ matrix.sdk_platform }}.zip"
+          tag="${{ env.REXSDK_TAG }}"
+          url="https://github.com/rexglue/rexglue-sdk/releases/download/${tag}/rexglue-sdk-${tag}-${{ matrix.sdk_platform }}.zip"
           curl -fL "$url" -o sdk.zip
           unzip sdk.zip -d sdk
 
       - name: Migrate (generate rexglue.cmake)
         shell: bash
         run: |
-          sdk/${{ matrix.sdk_dir }}/bin/rexglue migrate --app_root . rekameo_config.toml
+          sdk/${{ matrix.sdk_dir }}/bin/rexglue migrate --app_root .
 
       - name: Cache XEX asset for codegen
         id: asset-cache
@@ -107,7 +106,7 @@ jobs:
             -DCMAKE_CXX_COMPILER_LAUNCHER=sccache
 
       - name: Codegen
-        run: cmake --build --preset ${{ matrix.preset }} --target rekameo_codegen
+        run: cmake --build --preset ${{ matrix.preset }} --target kameo_codegen
 
       - name: Reconfigure (pick up generated/sources.cmake)
         shell: bash
@@ -127,7 +126,7 @@ jobs:
 
       - name: Upload workflow artifact
         if: inputs.publish_mode == 'artifact'
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ inputs.artifact_name }}-${{ matrix.platform }}
           path: ${{ matrix.binary }}
@@ -135,7 +134,7 @@ jobs:
 
       - name: Upload release artifact
         if: inputs.publish_mode == 'release'
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v4
         with:
           name: release-${{ matrix.platform }}
           path: ${{ matrix.binary }}

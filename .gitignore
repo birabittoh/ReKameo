@@ -22,9 +22,9 @@ src/main.cpp.bak
 
 # Runtime logs & drop-in files produced by Play*.bat
 /logs/
-rekameo
-rekameo.exe
-rekameo.pdb
+kameo
+kameo.exe
+kameo.pdb
 
 # Game assets extracted from the user's ISO
 # (the ISO itself and anything derived from it must NEVER be committed)

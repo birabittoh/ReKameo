@@ -15,5 +15,5 @@ jobs:
     uses: ./.github/workflows/_build.yml
     with:
       publish_mode: artifact
-      artifact_name: rekameo-${{ github.sha }}
+      artifact_name: kameo-${{ github.sha }}
     secrets: inherit
